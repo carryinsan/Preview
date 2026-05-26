@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI UI Architect</title>
+  <meta name="description" content="Premium AI UI generator powered by Gemini." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#09090b;
+      --panel:#101114;
+      --panel-2:#15161b;
+      --panel-3:#1b1d24;
+      --line:rgba(255,255,255,.10);
+      --line-2:rgba(255,255,255,.06);
+      --text:#e8ebf2;
+      --muted:#8a91a8;
+      --cyan:#4be3ff;
+      --purple:#8b7dff;
+      --gold:#d9b46b;
+      --good:#45d483;
+      --bad:#ff6b7a;
+      --shadow: 0 20px 80px rgba(0,0,0,.45);
+      --radius: 20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 800px at 20% 0%, rgba(75,227,255,.10), transparent 55%),
+        radial-gradient(900px 700px at 80% 10%, rgba(139,125,255,.12), transparent 50%),
+        linear-gradient(180deg,#07070a 0%, #09090b 100%);
+      color:var(--text);
+      overflow:hidden;
+    }
+    button, textarea, input { font: inherit; }
+    .app {
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .topbar{
+      flex:0 0 auto;
+      height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 18px;
+      border-bottom:1px solid var(--line);
+      background:rgba(14,15,18,.72);
+      backdrop-filter: blur(18px);
+      position:sticky;
+      top:0;
+      z-index:20;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;min-width:0
+    }
+    .brand-mark{
+      width:40px;height:40px;border-radius:14px;
+      background:linear-gradient(135deg, rgba(75,227,255,.95), rgba(139,125,255,.95));
+      box-shadow:0 0 28px rgba(75,227,255,.28);
+      display:grid;place-items:center;
+      color:#fff;
+      font-weight:800;
+      letter-spacing:.08em;
+      flex:0 0 auto;
+    }
+    .brand h1{
+      margin:0;
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:-0.02em;
+      line-height:1.1;
+    }
+    .brand small{
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:500;
+    }
+    .topbar-right{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.03);
+      color:#cbd2e5;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px rgba(69,212,131,.7)}
+    .layout{
+      flex:1 1 auto;
+      display:grid;
+      grid-template-columns: 430px 1fr;
+      min-height:0;
+    }
+    .sidebar{
+      min-height:0;
+      border-right:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(17,18,22,.92), rgba(14,15,18,.96));
+      display:flex;
+      flex-direction:column;
+    }
+    .sidebar-inner{
+      flex:1 1 auto;
+      min-height:0;
+      overflow:auto;
+      padding:18px;
+    }
+    .section-title{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:#aab2c6;
+    }
+    .link-btn{
+      border:0;
+      background:transparent;
+      color:#92a0c4;
+      cursor:pointer;
+      font-size:12px;
+      padding:0;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .link-btn:hover{color:var(--cyan)}
+    .textarea-wrap{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    textarea{
+      width:100%;
+      min-height:340px;
+      resize:vertical;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(7,7,10,.85);
+      color:#dde2ee;
+      padding:16px;
+      outline:none;
+      line-height:1.5;
+      font-size:13px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    textarea:focus{
+      border-color:rgba(75,227,255,.55);
+      box-shadow:0 0 0 4px rgba(75,227,255,.10);
+    }
+    textarea:disabled, button:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+    .status-card{
+      margin-top:14px;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid var(--line-2);
+      background:rgba(255,255,255,.03);
+      box-shadow: var(--shadow);
+    }
+    .status-card h3{
+      margin:0 0 12px;
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#9fa8bd;
+    }
+    .steps{
+      display:grid;
+      gap:11px;
+    }
+    .step{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#9aa3b7;
+      font-size:13px;
+    }
+    .bubble{
+      width:22px;height:22px;border-radius:999px;
+      display:grid;place-items:center;
+      flex:0 0 auto;
+      border:1px solid transparent;
+      background:rgba(255,255,255,.04);
+    }
+    .step.active{color:var(--cyan)}
+    .step.done{color:#dce3f2}
+    .bubble.active{
+      border-color:rgba(75,227,255,.45);
+      background:rgba(75,227,255,.12);
+      box-shadow:0 0 14px rgba(75,227,255,.18);
+    }
+    .bubble.done{
+      background:rgba(69,212,131,.14);
+      color:var(--good);
+    }
+    .bubble.error{
+      background:rgba(255,107,122,.12);
+      color:var(--bad);
+    }
+    .errorbox{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,107,122,.25);
+      background:rgba(255,107,122,.08);
+      color:#ffc6cd;
+      font-size:13px;
+      display:none;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .errorbox.show{display:flex}
+    .sidebar-footer{
+      flex:0 0 auto;
+      padding:16px 18px;
+      border-top:1px solid var(--line);
+      background:rgba(15,16,19,.85);
+    }
+    .generate-btn{
+      width:100%;
+      border:0;
+      border-radius:18px;
+      padding:14px 16px;
+      color:#fff;
+      font-weight:700;
+      letter-spacing:.01em;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(135deg, rgba(75,227,255,.95), rgba(139,125,255,.95));
+      box-shadow:0 16px 40px rgba(75,227,255,.18);
+      transition:transform .2s ease, filter .2s ease;
+    }
+    .generate-btn:hover{transform:translateY(-1px); filter:saturate(1.06)}
+    .generate-btn:active{transform:translateY(0)}
+    .generate-btn .inner{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      background:rgba(8,8,10,.92);
+      border-radius:16px;
+      padding:12px 14px;
+    }
+    .content{
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      background:rgba(8,8,10,.55);
+    }
+    .tabs{
+      flex:0 0 auto;
+      display:flex;
+      gap:8px;
+      padding:14px 14px 0;
+      border-bottom:1px solid var(--line);
+      background:rgba(14,15,18,.85);
+      backdrop-filter: blur(18px);
+    }
+    .tab{
+      appearance:none;
+      border:1px solid transparent;
+      border-bottom:0;
+      background:transparent;
+      color:#8f98af;
+      padding:12px 14px;
+      border-top-left-radius:14px;
+      border-top-right-radius:14px;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition:all .18s ease;
+    }
+    .tab:hover{color:#fff;background:rgba(255,255,255,.04)}
+    .tab.active{
+      background:#171920;
+      color:var(--cyan);
+      border-color:var(--line);
+      box-shadow:0 -1px 0 rgba(75,227,255,.55) inset;
+    }
+    .workspace{
+      flex:1 1 auto;
+      min-height:0;
+      position:relative;
+      overflow:hidden;
+    }
+    .panel{
+      position:absolute;
+      inset:0;
+      display:none;
+    }
+    .panel.active{display:flex}
+    .preview-wrap{
+      background:linear-gradient(180deg, rgba(6,6,8,.85), rgba(3,3,5,.95));
+    }
+    iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      background:#fff;
+    }
+    .code-pane{
+      background:#171920;
+      color:#d8dcec;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .code-toolbar{
+      position:absolute;
+      top:14px;
+      right:14px;
+      z-index:5;
+    }
+    .copy-btn{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      backdrop-filter: blur(10px);
+    }
+    .copy-btn:hover{background:rgba(255,255,255,.10)}
+    pre{
+      margin:0;
+      padding:22px;
+      overflow:auto;
+      min-height:0;
+      font-size:13px;
+      line-height:1.6;
+      white-space:pre;
+    }
+    code{font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+    .empty-state{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#7c849b;
+      text-align:center;
+      padding:24px;
+    }
+    .empty-card{
+      max-width:420px;
+      padding:28px;
+      border-radius:24px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      box-shadow:var(--shadow);
+    }
+    .spinner{
+      width:76px;height:76px;border-radius:50%;
+      border:2px solid rgba(255,255,255,.06);
+      border-top-color:var(--cyan);
+      border-right-color:var(--purple);
+      animation:spin 1s linear infinite;
+      margin:0 auto 18px;
+    }
+    .spinner.small{width:18px;height:18px;margin:0;display:inline-block;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-line{
+      margin-top:10px;
+      font-size:13px;
+      color:#a3a8ba;
+    }
+    .badge-row{
+      margin-top:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:center;
+    }
+    .badge{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:12px;
+      color:#cdd3e5;
+    }
+    .preview-hint{
+      font-size:12px;
+      color:#8e96ab;
+      margin-top:8px;
+    }
+    .sr-only{
+      position:absolute!important;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
+    }
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px;border:2px solid transparent;background-clip:padding-box}
+    ::-webkit-scrollbar-track{background:transparent}
+    @media (max-width: 1100px){
+      .layout{grid-template-columns: 1fr}
+      .sidebar{border-right:0;border-bottom:1px solid var(--line)}
+      body{overflow:auto}
+      .app{height:auto;min-height:100vh}
+      .content{min-height:75vh}
+      .sidebar-inner{max-height:none}
+    }
+    @media (max-width: 720px){
+      .topbar{height:auto; padding:14px; gap:12px; align-items:flex-start; flex-direction:column}
+      .topbar-right{justify-content:flex-start}
+      .layout{grid-template-columns:1fr}
+      .sidebar-inner{padding:14px}
+      .tabs{overflow:auto}
+      .tab{white-space:nowrap}
+      textarea{min-height:280px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div>
+          <h1>AI UI Architect</h1>
+          <small>Gemini-powered single page generator</small>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="pill"><span class="dot"></span><span id="modelLabel">Waiting for input</span></div>
+        <div class="pill">API route: <strong>/api/gemini.js</strong></div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-inner">
+          <div class="section-title">
+            <h2>Design specifications</h2>
+            <button class="link-btn" id="resetBtn" type="button">↺ Reset prompt</button>
+          </div>
+
+          <div class="textarea-wrap">
+            <label class="sr-only" for="promptInput">Prompt</label>
+            <textarea id="promptInput" spellcheck="false"></textarea>
+          </div>
+
+          <div class="status-card">
+            <h3>Generation status</h3>
+            <div class="steps">
+              <div class="step" id="stepRequest">
+                <div class="bubble" id="bubbleRequest">1</div>
+                <div>Request dispatched</div>
+              </div>
+              <div class="step" id="stepParse">
+                <div class="bubble" id="bubbleParse">2</div>
+                <div>Response parsed</div>
+              </div>
+              <div class="step" id="stepRender">
+                <div class="bubble" id="bubbleRender">3</div>
+                <div>Preview rendered</div>
+              </div>
+            </div>
+            <div class="errorbox" id="errorBox"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="generate-btn" id="generateBtn" type="button">
+            <span class="inner" id="generateInner">
+              <span>Generate UI Architecture</span>
+            </span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="tabs">
+          <button class="tab active" data-tab="preview" type="button">Live Preview</button>
+          <button class="tab" data-tab="html" type="button" id="htmlTab" disabled>index.html</button>
+          <button class="tab" data-tab="css" type="button" id="cssTab" disabled>styles.css</button>
+        </div>
+
+        <div class="workspace">
+          <section class="panel active preview-wrap" id="previewPanel">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-card">
+                <div class="spinner" id="previewSpinner" style="display:none"></div>
+                <h2 style="margin:0 0 8px;font-size:28px;letter-spacing:-0.03em;color:#eef2ff">Awaiting instructions</h2>
+                <div class="loading-line" id="previewMessage">Press Generate to initialize the preview.</div>
+                <div class="badge-row">
+                  <span class="badge">Glassmorphism</span>
+                  <span class="badge">Responsive Grid</span>
+                  <span class="badge">Luxury AI SaaS</span>
+                </div>
+                <div class="preview-hint">The AI output is injected into an iframe for safe preview.</div>
+              </div>
+            </div>
+            <iframe id="previewFrame" title="Live UI Preview" sandbox="allow-same-origin"></iframe>
+          </section>
+
+          <section class="panel code-pane" id="htmlPanel">
+            <div class="code-toolbar">
+              <button class="copy-btn" id="copyHtmlBtn" type="button">Copy HTML</button>
+            </div>
+            <pre><code id="htmlCode"></code></pre>
+          </section>
+
+          <section class="panel code-pane" id="cssPanel">
+            <div class="code-toolbar">
+              <button class="copy-btn" id="copyCssBtn" type="button">Copy CSS</button>
+            </div>
+            <pre><code id="cssCode"></code></pre>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_PROMPT = `Design a REALISTIC production-ready AI application UI for a premium platform named "ORACLE".
+
+CRITICAL:
+The UI must look POSSIBLE to build using:
+- HTML5
+- clean CSS
+- Framer Motion style animations (using pure CSS)
+- glassmorphism
+- gradients
+- SVG effects
+- responsive flex/grid layouts
+
+DO NOT create fantasy sci-fi interfaces that cannot exist in frontend code.
+
+STYLE:
+- ultra premium
+- emotionally addictive
+- psychologically immersive
+- futuristic but minimal
+- cinematic depth
+- elegant spacing
+- strong visual hierarchy
+- luxury AI brand identity
+- believable startup-grade SaaS design
+
+COLOR SYSTEM:
+- deep black background
+- dark navy gradients
+- electric cyan glow
+- subtle purple highlights
+- soft gold accents
+- low opacity glass panels
+- smooth bloom lighting
+- premium contrast ratios
+
+LAYOUT RULES:
+- mobile-first portrait layout
+- realistic spacing and padding
+- usable navigation
+- readable typography
+- proper section separation
+- accessible button sizing
+- realistic cards
+- no clutter
+- no fake holograms
+
+TYPOGRAPHY:
+- large bold cinematic headlines
+- clean modern sans-serif
+- highly readable
+- luxurious spacing
+- glowing heading accents
+
+ANIMATION STYLE:
+- smooth hover glow
+- floating particles
+- soft neural motion
+- subtle gradient movement
+- interactive lighting
+- responsive depth effects
+
+COMPONENT RULES:
+- all buttons realistic
+- all cards implementable
+- all UI sections aligned to grids
+- no impossible shapes
+- avoid random glowing objects
+- everything should feel intentionally designed
+
+OUTPUT STYLE:
+Create the main landing page for ORACLE, an ultra-premium AI orchestration platform.
+The page should feel like: "Apple + OpenAI + Neural Interface + Luxury Operating System"
+
+STRUCTURE:
+
+TOP NAVBAR:
+- ORACLE logo on left
+- navigation links: Vision, Modes, Memory, Features, Pricing, Docs
+- glowing "Launch ORACLE" CTA button
+- glassmorphism navbar
+- sticky navigation
+
+HERO SECTION:
+- massive cinematic neural visualization in center
+- abstract flowing intelligence waves
+- glowing core labeled "ORACLE"
+- HEADLINE: "UNLEASH THE INTELLIGENCE ECOSYSTEM"
+- SUBTEXT: ORACLE combines multiple reasoning engines into one adaptive intelligence system with persistent memory and premium conversational orchestration.
+- CTA BUTTONS: Experience ORACLE, Watch System Flow
+
+Below hero live status bar: Context Sync Active, Memory Routing Online, Multi-Model Orchestration Enabled, Neural Recall Stable
+
+FEATURE GRID (Premium cards with hover lighting):
+- Advanced Memory, Adaptive Routing, Context Persistence, Emotional Intelligence, Long-Context Recall, Source-Aware Responses
+
+AI MODES SECTION (Cards with distinct visual identity):
+- Spark, Smarter, Thinker, Flux, Sage, Oracle
+
+MEMORY SECTION:
+- Show contextual memory map / relationship linking
+
+ROUTING SECTION:
+- Visualize orchestration routing between AI modes cleanly.
+
+PREMIUM FEATURES SECTION:
+- immersive chat, file analysis, voice interaction, workspace system
+
+PRICING SECTION:
+- 3 premium pricing cards: Free, Professional, Oracle Elite
+
+FOOTER:
+- legal, docs, careers, contact, social icons`;
+
+    const state = {
+      prompt: DEFAULT_PROMPT,
+      html: "",
+      css: "",
+      activeTab: "preview",
+      generating: false,
+      copiedHtml: false,
+      copiedCss: false
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    const promptInput = el("promptInput");
+    const modelLabel = el("modelLabel");
+    const generateBtn = el("generateBtn");
+    const generateInner = el("generateInner");
+    const resetBtn = el("resetBtn");
+    const htmlTab = el("htmlTab");
+    const cssTab = el("cssTab");
+    const previewPanel = el("previewPanel");
+    const htmlPanel = el("htmlPanel");
+    const cssPanel = el("cssPanel");
+    const previewFrame = el("previewFrame");
+    const emptyState = el("emptyState");
+    const previewSpinner = el("previewSpinner");
+    const previewMessage = el("previewMessage");
+    const errorBox = el("errorBox");
+    const htmlCode = el("htmlCode");
+    const cssCode = el("cssCode");
+    const copyHtmlBtn = el("copyHtmlBtn");
+    const copyCssBtn = el("copyCssBtn");
+
+    const stepEls = {
+      request: el("stepRequest"),
+      parse: el("stepParse"),
+      render: el("stepRender"),
+      bubbleRequest: el("bubbleRequest"),
+      bubbleParse: el("bubbleParse"),
+      bubbleRender: el("bubbleRender")
+    };
+
+    promptInput.value = state.prompt;
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function combinedDoc(html, css) {
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Generated UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ color-scheme: dark; }
+  html,body{ margin:0; padding:0; background:#050507; color:#fff; font-family:Inter,system-ui,sans-serif; }
+  *,*::before,*::after{ box-sizing:border-box; }
+  img,svg{ max-width:100%; display:block; }
+  ${css || ""}
+</style>
+</head>
+<body>
+${html || ""}
+</body>
+</html>`;
+    }
+
+    function setActiveTab(tab) {
+      state.activeTab = tab;
+      document.querySelectorAll(".tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tab);
+      });
+      previewPanel.classList.toggle("active", tab === "preview");
+      htmlPanel.classList.toggle("active", tab === "html");
+      cssPanel.classList.toggle("active", tab === "css");
+    }
+
+    function setError(message) {
+      if (!message) {
+        errorBox.classList.remove("show");
+        errorBox.textContent = "";
+        return;
+      }
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+    }
+
+    function setStep(step) {
+      const steps = [
+        ["request", "Request dispatched"],
+        ["parse", "Response parsed"],
+        ["render", "Preview rendered"]
+      ];
+      steps.forEach(([key]) => {
+        const bubble = stepEls[`bubble${key[0].toUpperCase()}${key.slice(1)}`];
+        const row = stepEls[key];
+        row.classList.remove("active", "done");
+        bubble.classList.remove("active", "done", "error");
+        bubble.textContent = key === "request" ? "1" : key === "parse" ? "2" : "3";
+      });
+
+      if (step === "request") {
+        stepEls.request.classList.add("active");
+        stepEls.bubbleRequest.classList.add("active");
+        stepEls.bubbleRequest.textContent = "•";
+      } else if (step === "parse") {
+        stepEls.request.classList.add("done");
+        stepEls.parse.classList.add("active");
+        stepEls.bubbleRequest.classList.add("done");
+        stepEls.bubbleRequest.textContent = "✓";
+        stepEls.bubbleParse.classList.add("active");
+        stepEls.bubbleParse.textContent = "•";
+      } else if (step === "render") {
+        stepEls.request.classList.add("done");
+        stepEls.parse.classList.add("done");
+        stepEls.render.classList.add("active");
+        stepEls.bubbleRequest.classList.add("done");
+        stepEls.bubbleRequest.textContent = "✓";
+        stepEls.bubbleParse.classList.add("done");
+        stepEls.bubbleParse.textContent = "✓";
+        stepEls.bubbleRender.classList.add("active");
+        stepEls.bubbleRender.textContent = "•";
+      } else if (step === "done") {
+        stepEls.request.classList.add("done");
+        stepEls.parse.classList.add("done");
+        stepEls.render.classList.add("done");
+        stepEls.bubbleRequest.classList.add("done");
+        stepEls.bubbleRequest.textContent = "✓";
+        stepEls.bubbleParse.classList.add("done");
+        stepEls.bubbleParse.textContent = "✓";
+        stepEls.bubbleRender.classList.add("done");
+        stepEls.bubbleRender.textContent = "✓";
+      }
+    }
+
+    function setGenerating(isGenerating) {
+      state.generating = isGenerating;
+      promptInput.disabled = isGenerating;
+      generateBtn.disabled = isGenerating;
+      resetBtn.disabled = isGenerating;
+      htmlTab.disabled = !state.html;
+      cssTab.disabled = !state.css;
+
+      if (isGenerating) {
+        generateInner.innerHTML = '<span class="spinner small"></span><span>Orchestrating...</span>';
+        modelLabel.textContent = "Gemini request in progress";
+        previewSpinner.style.display = "block";
+        previewMessage.textContent = "Synthesizing UI...";
+      } else {
+        generateInner.innerHTML = "<span>Generate UI Architecture</span>";
+        modelLabel.textContent = "Ready";
+        previewSpinner.style.display = "none";
+      }
+    }
+
+    async function copyText(text, button, label) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = button.textContent;
+        button.textContent = "Copied";
+        setTimeout(() => (button.textContent = old), 1500);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        const old = button.textContent;
+        button.textContent = "Copied";
+        setTimeout(() => (button.textContent = old), 1500);
+      }
+    }
+
+    function renderOutput() {
+      htmlCode.textContent = state.html || "";
+      cssCode.textContent = state.css || "";
+      htmlTab.disabled = !state.html;
+      cssTab.disabled = !state.css;
+
+      if (state.html && state.css) {
+        previewFrame.srcdoc = combinedDoc(state.html, state.css);
+        emptyState.style.display = "none";
+      } else {
+        previewFrame.srcdoc = combinedDoc(`
+          <main style="min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center;background:radial-gradient(circle at top,#10131a 0%,#050507 60%);color:#fff;">
+            <div style="max-width:560px;padding:34px;border-radius:28px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);box-shadow:0 18px 70px rgba(0,0,0,.45);backdrop-filter:blur(18px)">
+              <div style="width:76px;height:76px;border-radius:50%;margin:0 auto 18px;border:2px solid rgba(75,227,255,.24);display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg,rgba(75,227,255,.12),rgba(139,125,255,.12));">A</div>
+              <h1 style="margin:0 0 10px;font-size:40px;letter-spacing:-.04em">Awaiting instructions</h1>
+              <p style="margin:0;color:#9aa3b7;font-size:15px;line-height:1.7">Enter a UI brief, then generate a production-ready HTML and CSS draft through Gemini.</p>
+            </div>
+          </main>
+        `, "");
+        emptyState.style.display = "grid";
+      }
+    }
+
+    function parseGeminiResponse(rawText) {
+      const htmlMatch = rawText.match(/```html\s*([\s\S]*?)```/i);
+      const cssMatch = rawText.match(/```css\s*([\s\S]*?)```/i);
+
+      if (htmlMatch && cssMatch) {
+        return {
+          html: htmlMatch[1].trim(),
+          css: cssMatch[1].trim()
+        };
+      }
+
+      const htmlAlt = rawText.match(/<html[\s\S]*<\/html>/i);
+      if (htmlAlt) {
+        return { html: htmlAlt[0].trim(), css: "" };
+      }
+
+      const htmlOnly = rawText.match(/```(?:markup|html)?\s*([\s\S]*?)```/i);
+      if (htmlOnly) {
+        return { html: htmlOnly[1].trim(), css: "" };
+      }
+
+      throw new Error("Could not parse Gemini output into HTML/CSS blocks.");
+    }
+
+    async function generateUI() {
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+
+      setError("");
+      state.html = "";
+      state.css = "";
+      renderOutput();
+      setGenerating(true);
+      setStep("request");
+
+      try {
+        const response = await fetch("/api/gemini.js", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+
+        if (!response.ok) {
+          const text = await response.text().catch(() => "");
+          throw new Error(text || `Request failed with ${response.status}`);
+        }
+
+        const data = await response.json();
+        setStep("parse");
+
+        if (!data || typeof data.html !== "string" || typeof data.css !== "string") {
+          throw new Error("Malformed API response. Expected { html, css }.");
+        }
+
+        state.html = data.html.trim();
+        state.css = data.css.trim();
+
+        setStep("render");
+        renderOutput();
+        setStep("done");
+        setActiveTab("preview");
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "Generation failed.");
+        modelLabel.textContent = "Generation failed";
+      } finally {
+        setGenerating(false);
+        htmlTab.disabled = !state.html;
+        cssTab.disabled = !state.css;
+      }
+    }
+
+    resetBtn.addEventListener("click", () => {
+      promptInput.value = DEFAULT_PROMPT;
+      state.prompt = DEFAULT_PROMPT;
+      setError("");
+    });
+
+    promptInput.addEventListener("input", () => {
+      state.prompt = promptInput.value;
+    });
+
+    generateBtn.addEventListener("click", generateUI);
+
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        setActiveTab(btn.dataset.tab);
+      });
+    });
+
+    copyHtmlBtn.addEventListener("click", () => copyText(state.html, copyHtmlBtn, "HTML"));
+    copyCssBtn.addEventListener("click", () => copyText(state.css, copyCssBtn, "CSS"));
+
+    // Initial render
+    renderOutput();
+    setActiveTab("preview");
+    modelLabel.textContent = "Ready";
+  </script>
+</body>
+  </html>
